@@ -1,7 +1,6 @@
 "use strict";
 
-var Jeff = (function () {
-
+var Jeff = (function () { 
     const FRAME_DELAY = 0;    // ms
 
     // CHART
@@ -10,6 +9,7 @@ var Jeff = (function () {
         var canvas = document.getElementById(elementId)
         canvas.width = cellSize * endX + 1;
         canvas.height = cellSize * endY + 1;
+        canvas.parentElement.scrollTop = canvas.height;
         this.context = canvas.getContext("2d");
         this.cellSize = cellSize;
         this.endX = endX;
@@ -18,7 +18,7 @@ var Jeff = (function () {
     }
 
     Chart.prototype.init = function () {
-        //this.context.fillStyle = 'gray';
+        this.context.fillStyle = 'black';
         this.context.fillRect(
             0,
             0,
@@ -35,16 +35,10 @@ var Jeff = (function () {
     Chart.prototype.set = function (x, y, z) {
         if (x < 0 || this.endX <= x || y < 0 || this.endY <= y)
             return false;
-        // this.context.fillStyle = (
-        //     z === undefined ? 'white'
-        //   : z < 100 ? 'blue'
-        //   : z < 200 ? 'green'
-        //   : z < 256 ? 'red'
-        //   : 'white');
-        var intensity = Math.min(255, z);
+        var intensity = (
+            z === undefined ? 255 : Math.max(100, Math.floor(z * 255)));
         this.context.fillStyle =
             `rgb(${intensity}, ${intensity}, ${intensity})`;
-        //console.log(z);
         this.context.fillRect(
             x * this.cellSize,
             (this.endY - y) * this.cellSize,
@@ -82,8 +76,8 @@ var Jeff = (function () {
     // JEFF
 
     function Jeff() {
-        this.collatz = new Chart('collatz', 2, 1000, 150);
-        this.lengths = new Chart('lengths', 2, 1000, 300);
+        this.collatz = new Chart('collatz', 2, 400, 400);
+        this.lengths = new Chart('lengths', 2, 6000, 400);
         this.title = new Title('title');
 
         this.state = { };
@@ -91,6 +85,8 @@ var Jeff = (function () {
         this.state.maxY = 1;      // highest value seen in current path
         this.state.x = 0;
         this.state.y = 1;
+
+        this.pauseButton = document.getElementById('pause');
     }
 
     Jeff.prototype.showCollatz = function (x, y, z) {
@@ -103,13 +99,15 @@ var Jeff = (function () {
             this.collatz.init();
             this.title.set(`${this.state.y0}`);
         }
-        if (this.showCollatz(this.state.x, this.state.y, this.state.y)) {
+        if (this.showCollatz(this.state.x, this.state.y)) {
             if (this.state.y >= 2) {
                 this.state.maxY = Math.max(this.state.maxY, this.state.y);
                 ++this.state.x;
                 this.state.y = Collatz.next(this.state.y);
             } else {
-                this.lengths.post(this.state.x, this.state.maxY);
+                this.lengths.post(
+                    this.state.x,
+                    1 - this.state.y0 / this.state.maxY);
                 ++this.state.y0;
                 this.state.maxY = 1;
                 this.state.x = 0;
@@ -134,13 +132,13 @@ var Jeff = (function () {
     };
 
     Jeff.prototype.pause = function () {
-        this.paused = true;
-    };
-
-    Jeff.prototype.resume = function() {
         if (this.paused) {
             this.paused = false;
+            this.pauseButton.innerText = 'Pause';
             this.loop();
+        } else {
+            this.paused = true;
+            this.pauseButton.innerText = 'Resume';
         }
     };
 

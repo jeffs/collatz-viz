@@ -7,15 +7,18 @@
     <script src="jeff.js"></script>
 </head>
 <body onload="Jeff.main()">
-    <canvas id="lengths">
-    </canvas>
-    <h1 id="title"></h1>
-    <canvas id="collatz">
-        This page requires &lt;canvas&gt; element support.
-    </canvas>
-
-    <button onclick="jeff.pause()">Pause</button>
-    <button onclick="jeff.resume()">Resume</button>
-    <button onclick="window.location.reload(true)">Reload</button>
+    <div class="control">
+        <button id='pause' onclick="jeff.pause()">Pause</button>
+        <p id="title"></p>
+        <div class="collatz">
+            <canvas id="collatz">
+                This page requires &lt;canvas&gt; element support.
+            </canvas>
+        </div>
+    </div>
+    <br />
+    <div class="lengths">
+        <canvas id="lengths"></canvas>
+    </div>
 </body>
 </html>
