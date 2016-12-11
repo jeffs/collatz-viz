@@ -18,7 +18,7 @@ var Jeff = (function () {
     }
 
     Chart.prototype.init = function () {
-        this.context.fillStyle = "gray";
+        //this.context.fillStyle = 'gray';
         this.context.fillRect(
             0,
             0,
@@ -32,10 +32,19 @@ var Jeff = (function () {
         this.x = 0;
     };
 
-    Chart.prototype.set = function (x, y) {
+    Chart.prototype.set = function (x, y, z) {
         if (x < 0 || this.endX <= x || y < 0 || this.endY <= y)
             return false;
-        this.context.fillStyle = "white";
+        // this.context.fillStyle = (
+        //     z === undefined ? 'white'
+        //   : z < 100 ? 'blue'
+        //   : z < 200 ? 'green'
+        //   : z < 256 ? 'red'
+        //   : 'white');
+        var intensity = Math.min(255, z);
+        this.context.fillStyle =
+            `rgb(${intensity}, ${intensity}, ${intensity})`;
+        //console.log(z);
         this.context.fillRect(
             x * this.cellSize,
             (this.endY - y) * this.cellSize,
@@ -44,8 +53,8 @@ var Jeff = (function () {
         return true;
     };
 
-    Chart.prototype.post = function (y) {
-        return this.set(this.x++, y);
+    Chart.prototype.post = function (y, z) {
+        return this.set(this.x++, y, z);
     };
 
     // COLLATZ
@@ -74,7 +83,7 @@ var Jeff = (function () {
 
     function Jeff() {
         this.collatz = new Chart('collatz', 2, 1000, 150);
-        this.lengths = new Chart('lengths', 1, 2000, 300);
+        this.lengths = new Chart('lengths', 2, 1000, 300);
         this.title = new Title('title');
 
         this.state = { };
@@ -84,9 +93,9 @@ var Jeff = (function () {
         this.state.y = 1;
     }
 
-    Jeff.prototype.showCollatz = function (x, y) {
+    Jeff.prototype.showCollatz = function (x, y, z) {
         var STRETCH = 4;
-        return this.collatz.set(x, STRETCH * Math.log2(y));
+        return this.collatz.set(x, STRETCH * Math.log2(y), z);
     };
 
     Jeff.prototype.tick = function () {
@@ -94,13 +103,13 @@ var Jeff = (function () {
             this.collatz.init();
             this.title.set(`${this.state.y0}`);
         }
-        if (this.showCollatz(this.state.x, this.state.y)) {
+        if (this.showCollatz(this.state.x, this.state.y, this.state.y)) {
             if (this.state.y >= 2) {
                 this.state.maxY = Math.max(this.state.maxY, this.state.y);
                 ++this.state.x;
                 this.state.y = Collatz.next(this.state.y);
             } else {
-                this.lengths.post(this.state.x);
+                this.lengths.post(this.state.x, this.state.maxY);
                 ++this.state.y0;
                 this.state.maxY = 1;
                 this.state.x = 0;
@@ -112,13 +121,27 @@ var Jeff = (function () {
     };
 
     Jeff.prototype.loop = function () {
-        this.tick();
-        var self = this;
-        window.setTimeout(function () { self.loop(); }, FRAME_DELAY);
+        if (!this.paused) {
+            this.tick();
+            var self = this;
+            window.setTimeout(function () { self.loop(); }, FRAME_DELAY);
+        }
     };
 
     Jeff.main = function () {
-        new Jeff().loop();
+        window.jeff = new Jeff();
+        window.jeff.loop();
+    };
+
+    Jeff.prototype.pause = function () {
+        this.paused = true;
+    };
+
+    Jeff.prototype.resume = function() {
+        if (this.paused) {
+            this.paused = false;
+            this.loop();
+        }
     };
 
     return Jeff;
