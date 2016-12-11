@@ -4,6 +4,8 @@ var Jeff = (function () {
 
     const FRAME_DELAY = 0;    // ms
 
+    // CHART
+
     function Chart(elementId, cellSize, endX, endY) {
         var canvas = document.getElementById(elementId)
         canvas.width = cellSize * endX + 1;
@@ -31,63 +33,92 @@ var Jeff = (function () {
     };
 
     Chart.prototype.set = function (x, y) {
+        if (x < 0 || this.endX <= x || y < 0 || this.endY <= y)
+            return false;
         this.context.fillStyle = "white";
         this.context.fillRect(
             x * this.cellSize,
             (this.endY - y) * this.cellSize,
             this.cellSize,
             this.cellSize);
+        return true;
     };
 
     Chart.prototype.post = function (y) {
-        this.set(this.x++, y);
+        return this.set(this.x++, y);
     };
+
+    // COLLATZ
+
+    var Collatz = { };
+
+    Collatz.next = function (y) {
+        return y % 2 === 0 ? y / 2 : y * 3 + 1;
+    };
+
+    // TITLE
+
+    function Title(elementId) {
+        this.element = document.getElementById('title');
+    };
+
+    Title.prototype.add = function (s) {
+        this.element.innerText += s;
+    };
+
+    Title.prototype.set = function (s) {
+        this.element.innerText = s;
+    };
+
+    // JEFF
 
     function Jeff() {
-        this.collatz = new Chart("collatz", 2, 1000, 150);
-        this.lengths = new Chart("lengths", 1, 2000, 300);
+        this.collatz = new Chart('collatz', 2, 1000, 150);
+        this.lengths = new Chart('lengths', 1, 2000, 300);
+        this.title = new Title('title');
+
+        this.state = { };
+        this.state.y0 = 1;
+        this.state.maxY = 1;      // highest value seen in current path
+        this.state.x = 0;
+        this.state.y = 1;
     }
 
-    Jeff.prototype.addTitle = function (s) {
-        document.getElementById("title").innerText += s;
+    Jeff.prototype.showCollatz = function (x, y) {
+        var STRETCH = 4;
+        return this.collatz.set(x, STRETCH * Math.log2(y));
     };
 
-    Jeff.prototype.setTitle = function (s) {
-        document.getElementById("title").innerText = s;
-    };
-
-    Jeff.prototype.imp = function (y0) {
-        this.setTitle(`${y0}`);
-        var self = this;
-        function next(y) {
-            return y % 2 === 0 ? y / 2 : y * 3 + 1;
+    Jeff.prototype.tick = function () {
+        if (this.state.x < 1) {
+            this.collatz.init();
+            this.title.set(`${this.state.y0}`);
         }
-        function show(y) {
-            self.collatz.post(y);
-        }
-        function loop(y) {
-            var logY = Math.log2(y) * 4;
-            if (y < 2) {
-                show(logY);
-                self.lengths.post(self.collatz.x);
-                window.setTimeout(
-                    function () {
-                        self.collatz.init();
-                        self.imp(y0 + 1);
-                    },
-                    FRAME_DELAY);
-            } else if (logY < self.collatz.endY) {
-                show(logY);
-                window.setTimeout(loop, FRAME_DELAY, next(y));
+        if (this.showCollatz(this.state.x, this.state.y)) {
+            if (this.state.y >= 2) {
+                this.state.maxY = Math.max(this.state.maxY, this.state.y);
+                ++this.state.x;
+                this.state.y = Collatz.next(this.state.y);
             } else {
-                self.addTitle(` went out of bounds at ${y}`);
+                this.lengths.post(this.state.x);
+                ++this.state.y0;
+                this.state.maxY = 1;
+                this.state.x = 0;
+                this.state.y = this.state.y0;
             }
+        } else {
+            this.title.add(` went out of bounds at ${this.state.y}`);
         }
-        loop(y0);
+    };
+
+    Jeff.prototype.loop = function () {
+        this.tick();
+        var self = this;
+        window.setTimeout(function () { self.loop(); }, FRAME_DELAY);
     };
 
     Jeff.main = function () {
-        new Jeff().imp(1);
+        new Jeff().loop();
     };
 
     return Jeff;
