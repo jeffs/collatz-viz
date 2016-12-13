@@ -37,3 +37,13 @@ div.lengths {
     right: 8px;
     width: 6em;
 }
+
+.control h2 {
+    bottom: 8px;
+    margin-bottom: 8px;
+    margin-right: 8px;
+    position: absolute;
+    right: 8px;
+    text-align: right;
+    width: 6em;
+}

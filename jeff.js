@@ -87,6 +87,7 @@ var Jeff = (function () {
         this.state.y = 1;
 
         this.pauseButton = document.getElementById('pause');
+        this.paused = true;
     }
 
     Jeff.prototype.showCollatz = function (x, y, z) {

@@ -2,13 +2,31 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>Playin' around</title>
+    <title>Collatz Visualization</title>
     <link href="default.css" rel="stylesheet" title="Default Style">
     <script src="jeff.js"></script>
 </head>
 <body onload="Jeff.main()">
+    <h1>Collatz Visualization</h1>
+
+    <p>The following two charts visualize Collatz paths.  Surprisingly
+        interesting patterns emerge.  The charts are independently
+        scrollable.</p>
+
+    <p>The upper chart plots Collatz paths on a log scale.  Each path starts
+        from the integer shown in the top left corner of the chart, and
+        continues until 1 is reached; at which point, the next path is
+        plotted.</p>
+        
+    <p>As paths are completed, their lengths are plotted on the lower chart. 
+        The resulting image begins as two "forks" at the left end of the chart,
+        and evolves into widening radial arcs.  Intensity (on a gray scale)
+        shows how far each path wanders from its start point, as a multiple of
+        the initial value.</p>
+
     <div class="control">
-        <button id='pause' onclick="jeff.pause()">Pause</button>
+        <h2>Path</h2>
+        <button id='pause' onclick="jeff.pause()">Start</button>
         <p id="title"></p>
         <div class="collatz">
             <canvas id="collatz">
@@ -17,8 +35,11 @@
         </div>
     </div>
     <br />
-    <div class="lengths">
-        <canvas id="lengths"></canvas>
+    <div class="control">
+        <h2>Path Lengths</h2>
+        <div class="lengths">
+            <canvas id="lengths"></canvas>
+        </div>
     </div>
 </body>
 </html>
