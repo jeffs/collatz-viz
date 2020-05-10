@@ -4,9 +4,9 @@
     <meta charset="utf-8"/>
     <title>Collatz Visualization</title>
     <link href="default.css" rel="stylesheet" title="Default Style">
-    <script src="jeff.js"></script>
+    <script src="collatz.js" type="module"></script>
 </head>
-<body onload="Jeff.main()">
+<body>
     <h1>Collatz Visualization</h1>
 
     <p>The following two charts visualize Collatz paths.  Surprisingly
@@ -26,7 +26,7 @@
 
     <div class="control">
         <h2>Path</h2>
-        <button id='pause' onclick="jeff.pause()">Start</button>
+        <button id='pause'>Start</button>
         <p id="title"></p>
         <div class="collatz">
             <canvas id="collatz">
